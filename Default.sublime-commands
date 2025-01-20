@@ -1,0 +1,42 @@
+[
+    {
+        "caption": "OllamaSublime: Settings",
+        "command": "edit_settings",
+        "args": {
+            "base_file": "${packages}/OllamaSublime/OllamaSublime.sublime-settings",
+            "default": "// settings in here override those in \"OllamaSublime/OllamaSublime.sublime-settings\",\n\n{\n\t$0\n}\n"
+        }
+    },
+    {
+        "caption": "OllamaSublime: Select Model",
+        "command": "ollama_sublime_select_model",
+        "args": {}
+    },
+    {
+        "caption": "OllamaSublime: Ask Prompt",
+        "command": "ollama_sublime_ask_any",
+        "args": {
+            "prompt": null
+        }
+    },
+    {
+        "caption": "OllamaSublime: Use Template",
+        "command": "ollama_sublime_use_template",
+        "args": {}
+    },
+    {
+        "caption": "OllamaSublime: Add Template",
+        "command": "ollama_sublime_add_template",
+        "args": {}
+    },
+    {
+        "caption": "OllamaSublime: Edit Template",
+        "command": "ollama_sublime_edit_template",
+        "args": {}
+    },
+    {
+        "caption": "OllamaSublime: Remove Template",
+        "command": "ollama_sublime_remove_template",
+        "args": {}
+    }
+]

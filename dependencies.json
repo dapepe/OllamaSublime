@@ -1,0 +1,9 @@
+{
+    "$schema": "sublime://packagecontrol.io/schemas/dependencies",
+
+    "*": {
+        "*": [
+            "requests"
+        ]
+    }
+}

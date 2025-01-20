@@ -1,0 +1,9 @@
+[
+    {
+        "keys": ["super+shift+o"],
+        "command": "ollama_sublime_ask_any",
+        "args": {
+            "prompt": null
+        }
+    }
+] 
