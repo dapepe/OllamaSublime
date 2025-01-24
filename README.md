@@ -36,6 +36,9 @@ OllamaSublime is a Sublime Text plugin that provides seamless integration with O
   - `OllamaSublime: Add Template` to save a new template
   - `OllamaSublime: Remove Template` to delete a template
   - `OllamaSublime: Settings` to configure the plugin
+  - `OllamaSublime: Cancel Request` to cancel the current request
+  - `OllamaSublime: Show History` to show the histor
+  - `OllamaSublime: Clear History` to clear the history
 
 ### Working with Context
 
@@ -80,7 +83,8 @@ Default settings can be modified through: Preferences > Package Settings > Ollam
       "title": "Translate",
       "prompt": "Translate the following text to French."
     }
-  ]
+  ],
+  "history": []  // Stores last 50 prompts automatically
 }
 ```
 
@@ -93,6 +97,7 @@ Default settings can be modified through: Preferences > Package Settings > Ollam
   - `title`: Template name shown in selection menu
   - `prompt`: The prompt text
   - `model`: (Optional) Specific model for this template
+- `history`: Array of previous prompts (managed automatically)
 
 ## Requirements
 

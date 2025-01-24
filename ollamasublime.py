@@ -3,6 +3,7 @@ import sublime_plugin
 import requests
 import json
 import threading
+import datetime
 
 class OllamaSublimeSelectModelCommand(sublime_plugin.ApplicationCommand):
     def run(self):
@@ -31,32 +32,60 @@ class OllamaSublimeAskAnyCommand(sublime_plugin.TextCommand):
             self.on_prompt_done(prompt)
     
     def on_prompt_done(self, prompt):
-        settings = sublime.load_settings('OllamaSublime.sublime-settings')
-        model = settings.get('selected_model')
-        if not model:
-            sublime.error_message("Please select a model first")
-            return
+        if prompt:
+            # Get settings
+            settings = sublime.load_settings('OllamaSublime.sublime-settings')
             
-        system_prompt = settings.get('systemPrompt', 'You are a helpful assistant.')
-        url = settings.get('ollamaUrl', 'http://localhost:11434')
-        
-        sel = self.view.sel()
-        if len(sel[0]) > 0:
-            # Get selection
-            context = self.view.substr(sel[0])
-            # Store the insertion point
-            insert_point = sel[0].end()
-            # Clear the selection
-            self.view.sel().clear()
-            # Insert two newlines after the previous selection
-            self.view.run_command('insert', {'characters': '\n\n'})
-            # Place cursor at the new position
-            self.view.sel().add(sublime.Region(insert_point + 2))
-        else:
-            context = self.view.substr(sublime.Region(0, self.view.size()))
-        
-        thread = OllamaRequestThread(self.view, url, model, system_prompt, prompt, context)
-        thread.start()
+            # Get current history
+            history = settings.get('history', [])
+            
+            # Create new entry
+            new_entry = {
+                'timestamp': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                'prompt': prompt,
+                'model': settings.get('selected_model')
+            }
+            
+            # Remove any existing entries with the same prompt (case-insensitive)
+            history = [h for h in history if h['prompt'].lower() != prompt.lower()]
+            
+            # Add new entry at the beginning
+            history.insert(0, new_entry)
+            
+            # Keep only last 50 items
+            if len(history) > 50:
+                history = history[0:50]
+            
+            # Save updated history
+            settings.set('history', history)
+            sublime.save_settings('OllamaSublime.sublime-settings')
+            
+            # Continue with request...
+            model = settings.get('selected_model')
+            if not model:
+                sublime.error_message("Please select a model first")
+                return
+            
+            system_prompt = settings.get('systemPrompt', 'You are a helpful assistant.')
+            url = settings.get('ollamaUrl', 'http://localhost:11434')
+            
+            sel = self.view.sel()
+            if len(sel[0]) > 0:
+                # Get selection
+                context = self.view.substr(sel[0])
+                # Store the insertion point
+                insert_point = sel[0].end()
+                # Clear the selection
+                self.view.sel().clear()
+                # Insert two newlines after the previous selection
+                self.view.run_command('insert', {'characters': '\n\n'})
+                # Place cursor at the new position
+                self.view.sel().add(sublime.Region(insert_point + 2))
+            else:
+                context = self.view.substr(sublime.Region(0, self.view.size()))
+            
+            thread = OllamaRequestThread(self.view, url, model, system_prompt, prompt, context)
+            thread.start()
 
 class OllamaSublimeUseTemplateCommand(sublime_plugin.TextCommand):
     def run(self, edit):
@@ -270,6 +299,33 @@ class OllamaSublimeEditTemplateCommand(sublime_plugin.ApplicationCommand):
             sublime.save_settings('OllamaSublime.sublime-settings')
             sublime.status_message("Template updated successfully")
 
+class OllamaSublimeRequestManager:
+    _instance = None
+    _current_thread = None
+
+    @classmethod
+    def get_instance(cls):
+        if cls._instance is None:
+            cls._instance = cls()
+        return cls._instance
+    
+    def set_current_thread(self, thread):
+        self._current_thread = thread
+    
+    def cancel_current_request(self):
+        if self._current_thread and self._current_thread.is_alive():
+            self._current_thread.cancel()
+            return True
+        return False
+
+class OllamaSublimeCancelRequestCommand(sublime_plugin.ApplicationCommand):
+    def run(self):
+        manager = OllamaSublimeRequestManager.get_instance()
+        if manager.cancel_current_request():
+            sublime.status_message("OllamaSublime: Request cancelled")
+        else:
+            sublime.status_message("OllamaSublime: No active request to cancel")
+
 class OllamaRequestThread(threading.Thread):
     def __init__(self, view, url, model, system_prompt, prompt, context):
         threading.Thread.__init__(self)
@@ -279,60 +335,128 @@ class OllamaRequestThread(threading.Thread):
         self.system_prompt = system_prompt
         self.prompt = prompt
         self.context = context
+        self.cancelled = False
+        self.response = None
+        
+        # Register as current thread
+        OllamaSublimeRequestManager.get_instance().set_current_thread(self)
+
+    def cancel(self):
+        self.cancelled = True
+        if self.response:
+            try:
+                self.response.close()
+            except:
+                pass  # Ignore any errors during close
 
     def run(self):
         try:
-            # Show loading indicator
             sublime.set_timeout(
-                lambda: self.view.set_status('ollama', 'OllamaSublime: Generating response...'),
+                lambda: self.view.set_status('ollama', 'OllamaSublime: Generating response with {0}... (Press Cmd/Ctrl+Shift+C to cancel)'.format(self.model)),
                 0
             )
             
-            # Log request details
             print("OllamaSublime: Making request to {0}".format(self.url))
             print("OllamaSublime: Using model: {0}".format(self.model))
             
-            response = requests.post(
-                "{0}/api/generate".format(self.url),
-                json={
-                    "model": self.model,
-                    "system": self.system_prompt,
-                    "prompt": "{0}\n\n{1}".format(self.context, self.prompt),
-                    "stream": True
-                },
-                stream=True
-            )
-            
-            for line in response.iter_lines():
-                if line:
-                    # Decode bytes to string before parsing JSON
-                    data = json.loads(line.decode('utf-8'))
-                    if 'response' in data:
+            try:
+                self.response = requests.post(
+                    "{0}/api/generate".format(self.url),
+                    json={
+                        "model": self.model,
+                        "system": self.system_prompt,
+                        "prompt": "{0}\n\n{1}".format(self.context, self.prompt),
+                        "stream": True
+                    },
+                    stream=True
+                )
+
+                for line in self.response.iter_lines():
+                    if self.cancelled:
+                        print("OllamaSublime: Request cancelled by user")
                         sublime.set_timeout(
-                            lambda x=data['response']: self.view.run_command('ollama_insert_text', {'text': x}),
+                            lambda: self.view.erase_status('ollama'),
                             0
                         )
-            
-            # Clear status when done
-            sublime.set_timeout(
-                lambda: self.view.erase_status('ollama'),
-                0
-            )
-            
-            # Log completion
-            print("OllamaSublime: Request completed successfully")
-            
+                        return
+                        
+                    if line:
+                        data = json.loads(line.decode('utf-8'))
+                        if 'response' in data:
+                            sublime.set_timeout(
+                                lambda x=data['response']: self.view.run_command('ollama_insert_text', {'text': x}),
+                                0
+                            )
+            finally:
+                if self.response:
+                    try:
+                        self.response.close()
+                    except:
+                        pass
+                
+                # Always clear the status bar
+                sublime.set_timeout(
+                    lambda: self.view.erase_status('ollama'),
+                    0
+                )
+                
         except Exception as e:
-            # Clear status and show error
+            if not self.cancelled:
+                print("OllamaSublime Error: {0}".format(str(e)))
+                sublime.error_message("Error making request: {0}".format(str(e)))
+            # Clear status even on error
             sublime.set_timeout(
                 lambda: self.view.erase_status('ollama'),
                 0
             )
-            print("OllamaSublime Error: {0}".format(str(e)))
-            sublime.error_message("Error making request: {0}".format(str(e)))
 
 class OllamaInsertTextCommand(sublime_plugin.TextCommand):
     def run(self, edit, text):
         sel = self.view.sel()
         if sel:
             self.view.insert(edit, sel[0].begin(), text)
+
+class OllamaSublimeShowHistoryCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        settings = sublime.load_settings('OllamaSublime.sublime-settings')
+        history = settings.get('history', [])
+        
+        if not history:
+            sublime.error_message("No history available")
+            return
+        
+        # Sort history by timestamp (newest first)
+        history = sorted(
+            history,
+            key=lambda x: datetime.datetime.strptime(x['timestamp'], '%Y-%m-%d %H:%M:%S'),
+            reverse=True
+        )
+        
+        # Create list items with preview and timestamp
+        items = ["{0} - {1}".format(
+            h['timestamp'],
+            h['prompt'][:50] + "..." if len(h['prompt']) > 50 else h['prompt']
+        ) for h in history]
+        
+        def on_done(index):
+            if index >= 0:
+                # Get the selected history item
+                selected = history[index]
+                
+                # Show input panel with historical prompt for editing
+                self.view.window().show_input_panel(
+                    "Edit prompt:", 
+                    selected['prompt'],
+                    lambda prompt: self.view.run_command('ollamasublime_ask_any', {'prompt': prompt}),
+                    None,
+                    None
+                )
+        
+        sublime.active_window().show_quick_panel(items, on_done)
+
+class OllamaSublimeClearHistoryCommand(sublime_plugin.ApplicationCommand):
+    def run(self):
+        settings = sublime.load_settings('OllamaSublime.sublime-settings')
+        settings.set('history', [])
+        sublime.save_settings('OllamaSublime.sublime-settings')
+        sublime.status_message("OllamaSublime: History cleared")

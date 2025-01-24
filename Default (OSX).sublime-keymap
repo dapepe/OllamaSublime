@@ -5,5 +5,10 @@
         "args": {
             "prompt": null
         }
+    },
+    {
+        "keys": ["super+shift+c"],
+        "command": "ollama_sublime_cancel_request",
+        "args": {}
     }
 ] 

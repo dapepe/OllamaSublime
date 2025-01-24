@@ -10,7 +10,7 @@
         },
         {
             "title": "Translate",
-            "prompt": "Translate the following text to French."
+            "prompt": "Translate the following text to German."
         }
         // Add more templates as needed
     ],

@@ -38,5 +38,15 @@
         "caption": "OllamaSublime: Remove Template",
         "command": "ollama_sublime_remove_template",
         "args": {}
+    },
+    {
+        "caption": "OllamaSublime: Show History",
+        "command": "ollama_sublime_show_history",
+        "args": {}
+    },
+    {
+        "caption": "OllamaSublime: Clear History",
+        "command": "ollama_sublime_clear_history",
+        "args": {}
     }
 ]
