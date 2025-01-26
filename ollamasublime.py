@@ -447,7 +447,7 @@ class OllamaSublimeShowHistoryCommand(sublime_plugin.TextCommand):
                 self.view.window().show_input_panel(
                     "Edit prompt:", 
                     selected['prompt'],
-                    lambda prompt: self.view.run_command('ollamasublime_ask_any', {'prompt': prompt}),
+                    lambda prompt: self.view.run_command('ollama_sublime_ask_any', {'prompt': prompt}),
                     None,
                     None
                 )
