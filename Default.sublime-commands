@@ -48,5 +48,10 @@
         "caption": "OllamaSublime: Clear History",
         "command": "ollama_sublime_clear_history",
         "args": {}
+    },
+    {
+        "caption": "OllamaSublime: Toggle Output Panel",
+        "command": "ollama_sublime_toggle_output_panel",
+        "args": {}
     }
 ]

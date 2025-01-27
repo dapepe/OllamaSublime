@@ -5,6 +5,87 @@ import json
 import threading
 import datetime
 
+class OllamaSublimeOutputPanel:
+    _instance = None
+    
+    @classmethod
+    def get_instance(cls):
+        if cls._instance is None:
+            cls._instance = cls()
+        return cls._instance
+    
+    def __init__(self):
+        self.view = None
+        self.window = None
+    
+    def ensure_view(self):
+        active_window = sublime.active_window()
+        if self.window != active_window or self.view is None or self.view.window() is None:
+            self.window = active_window
+            
+            # Create a new group on the right if it doesn't exist
+            if len(self.window.layout()['cells']) == 1:
+                self.window.run_command('set_layout', {
+                    'cols': [0.0, 0.7, 1.0],
+                    'rows': [0.0, 1.0],
+                    'cells': [[0, 0, 1, 1], [1, 0, 2, 1]]
+                })
+            
+            # Create new view for output
+            self.view = self.window.new_file()
+            self.view.set_name('Ollama Output')
+            self.view.set_scratch(True)  # Don't prompt to save
+            self.view.set_read_only(True)
+            
+            # Enable word wrap
+            self.view.settings().set('word_wrap', True)
+            
+            # Move to rightmost group
+            self.window.run_command('move_to_group', {
+                'group': len(self.window.layout()['cells']) - 1
+            })
+    
+    def show(self):
+        self.ensure_view()
+        self.window.focus_view(self.view)
+    
+    def hide(self):
+        if self.window and self.view:
+            self.view.close()
+            self.view = None
+            
+            # Reset layout if this was the last view in the right group
+            right_group = len(self.window.layout()['cells']) - 1
+            if len(self.window.views_in_group(right_group)) == 0:
+                self.window.run_command('set_layout', {
+                    'cols': [0.0, 1.0],
+                    'rows': [0.0, 1.0],
+                    'cells': [[0, 0, 1, 1]]
+                })
+    
+    def is_visible(self):
+        return self.view is not None and self.view.window() is not None
+    
+    def write(self, text):
+        self.ensure_view()
+        self.view.run_command('ollama_append_text', {'text': text})
+
+class OllamaSublimeToggleOutputPanelCommand(sublime_plugin.WindowCommand):
+    def run(self):
+        panel = OllamaSublimeOutputPanel.get_instance()
+        if panel.is_visible():
+            panel.hide()
+        else:
+            panel.show()
+
+class OllamaAppendTextCommand(sublime_plugin.TextCommand):
+    def run(self, edit, text):
+        self.view.set_read_only(False)
+        self.view.insert(edit, self.view.size(), text)
+        self.view.set_read_only(True)
+        # Scroll to the end
+        self.view.show(self.view.size())
+
 class OllamaSublimeSelectModelCommand(sublime_plugin.ApplicationCommand):
     def run(self):
         settings = sublime.load_settings('OllamaSublime.sublime-settings')
@@ -383,8 +464,15 @@ class OllamaRequestThread(threading.Thread):
                     if line:
                         data = json.loads(line.decode('utf-8'))
                         if 'response' in data:
+                            def handle_response(response_text):
+                                panel = OllamaSublimeOutputPanel.get_instance()
+                                if panel.is_visible():
+                                    panel.write(response_text)
+                                else:
+                                    self.view.run_command('ollama_insert_text', {'text': response_text})
+                            
                             sublime.set_timeout(
-                                lambda x=data['response']: self.view.run_command('ollama_insert_text', {'text': x}),
+                                lambda x=data['response']: handle_response(x),
                                 0
                             )
             finally:

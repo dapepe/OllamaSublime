@@ -10,5 +10,10 @@
         "keys": ["super+shift+c"],
         "command": "ollama_sublime_cancel_request",
         "args": {}
+    },
+    {
+        "keys": ["super+shift+k"],
+        "command": "ollama_sublime_toggle_output_panel",
+        "args": {}
     }
-] 
+]
