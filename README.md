@@ -29,6 +29,7 @@ OllamaSublime is a Sublime Text plugin that provides seamless integration with O
 ### Basic Commands
 
 - `Cmd/Ctrl + Shift + O`: Quick prompt input
+- `Cmd/Ctrl + Shift + K`: Toggle output panel
 - `Cmd/Ctrl + Shift + P` then type:
   - `OllamaSublime: Select Model` to choose an Ollama model
   - `OllamaSublime: Ask Prompt` to enter a prompt
@@ -39,6 +40,15 @@ OllamaSublime is a Sublime Text plugin that provides seamless integration with O
   - `OllamaSublime: Cancel Request` to cancel the current request
   - `OllamaSublime: Show History` to show the histor
   - `OllamaSublime: Clear History` to clear the history
+  - `OllamaSublime: Toggle Output Panel` to show/hide the output panel
+
+### Output Panel
+
+The output panel provides a dedicated space for viewing AI responses without modifying your current file. You can:
+- Toggle it with `Cmd/Ctrl + Shift + K`
+- Use it through Command Palette: `OllamaSublime: Toggle Output Panel`
+- Keep it open while working with multiple prompts
+- Scroll through longer responses easily
 
 ### Working with Context
 
