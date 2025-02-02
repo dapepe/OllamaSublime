@@ -39,6 +39,8 @@ Open the command window (`Cmd/Ctrl + Shift + P`) then type:
   - `Ollama: Show History` to show the history
   - `Ollama: Clear History` to clear the history
   - `Ollama: Toggle Output Panel` to show/hide the output panel
+  - `Ollama: Add Context` to add files or folders as context
+  - `Ollama: Remove Context` to remove previously added contexts
 
 I recommend setting up keyboard shortcuts for these commands, e.g.
 
@@ -46,9 +48,26 @@ I recommend setting up keyboard shortcuts for these commands, e.g.
 { "keys": ["shift+super+t"], "command": "ollama_use_template" },
 { "keys": ["shift+super+h"], "command": "ollama_show_history" },
 { "keys": ["super+shift+o"], "command": "ollama_ask_any", "args": { "prompt": null } },
-{ "keys": ["ctrk+shift+c"], "command": "ollama_cancel_request", "args": {} },
-{ "keys": ["super+shift+k"], "command": "ollama_toggle_output_panel", "args": {} }
+{ "keys": ["ctrl+shift+c"], "command": "ollama_cancel_request", "args": {} },
+{ "keys": ["super+shift+k"], "command": "ollama_toggle_output_panel", "args": {} },
+{ "keys": ["super+shift+m"], "command": "ollama_select_model", "args": {} },
+{ "keys": ["super+shift+c"], "command": "ollama_add_context", "args": {} },
+{ "keys": ["super+ctrl+c"], "command": "ollama_remove_context", "args": {} }
 ```
+
+### Adding Context
+
+- Use `Ollama: Add Context` to add files or folders as context
+- Supports wildcards (e.g., `./src/**.py` for all Python files in src and subdirectories)
+- Use `Ollama: Remove Context` to remove previously added contexts
+- Only text-based file types are included (configurable in settings)
+- Context files are automatically included in all queries
+
+Example context patterns:
+- `./src/**.py` - all Python files in src and subdirectories
+- `./docs/*.md` - all Markdown files in docs directory
+- `./config.json` - single file
+- `./templates/` - all supported files in templates directory
 
 ### Output Panel
 

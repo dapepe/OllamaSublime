@@ -4,6 +4,8 @@ import requests
 import json
 import threading
 import datetime
+import os
+import fnmatch
 
 class OllamaOutputPanel:
     _instance = None
@@ -440,13 +442,21 @@ class RequestThread(threading.Thread):
             print("Ollama: Making request to {0}".format(self.url))
             print("Ollama: Using model: {0}".format(self.model))
             
+            settings = sublime.load_settings('Ollama.sublime-settings')
+            context_paths = settings.get('context_paths', [])
+            supported_extensions = settings.get('supported_extensions', [])
+
+            # Get additional context from files
+            additional_context = get_context_files(context_paths, supported_extensions)
+            full_context = "{0}\n\n{1}".format(additional_context, self.context) if additional_context else self.context
+
             try:
                 self.response = requests.post(
                     "{0}/api/generate".format(self.url),
                     json={
                         "model": self.model,
                         "system": self.system_prompt,
-                        "prompt": "{0}\n\n{1}".format(self.context, self.prompt),
+                        "prompt": "{0}\n\n{1}".format(full_context, self.prompt),
                         "stream": True
                     },
                     stream=True
@@ -548,3 +558,119 @@ class OllamaClearHistoryCommand(sublime_plugin.ApplicationCommand):
         settings.set('history', [])
         sublime.save_settings('Ollama.sublime-settings')
         sublime.status_message("Ollama: History cleared")
+
+class OllamaAddContextCommand(sublime_plugin.WindowCommand):
+    def run(self):
+        # Get current file path as default
+        current_view = self.window.active_view()
+        default_path = ""
+        if current_view and current_view.file_name():
+            default_path = os.path.dirname(current_view.file_name()) + os.sep + "**"
+        
+        self.window.show_input_panel(
+            "Add context path (supports wildcards, e.g., ./**.py):",
+            default_path,
+            self.on_done,
+            None,
+            None
+        )
+    
+    def on_done(self, path):
+        settings = sublime.load_settings('Ollama.sublime-settings')
+        supported_extensions = settings.get('supported_extensions', [])
+        context_paths = settings.get('context_paths', [])
+        
+        # Add new path
+        if path and path not in context_paths:
+            context_paths.append(path)
+            settings.set('context_paths', context_paths)
+            sublime.save_settings('Ollama.sublime-settings')
+            
+            # Calculate stats
+            file_count = 0
+            total_size = 0
+            
+            try:
+                if '**' in path:
+                    base_path = path.split('**')[0]
+                    pattern = path.split('**')[1]
+                    for root, _, files in os.walk(base_path):
+                        for file in files:
+                            if any(file.endswith('.' + ext) for ext in supported_extensions):
+                                file_path = os.path.join(root, file)
+                                if fnmatch.fnmatch(file_path, path):
+                                    file_count += 1
+                                    total_size += os.path.getsize(file_path)
+                else:
+                    if os.path.isfile(path):
+                        if any(path.endswith('.' + ext) for ext in supported_extensions):
+                            file_count = 1
+                            total_size = os.path.getsize(path)
+                    elif os.path.isdir(path):
+                        for file in os.listdir(path):
+                            if any(file.endswith('.' + ext) for ext in supported_extensions):
+                                file_path = os.path.join(path, file)
+                                if os.path.isfile(file_path):
+                                    file_count += 1
+                                    total_size += os.path.getsize(file_path)
+                
+                size_kb = total_size / 1024
+                sublime.status_message("Context added: {0} files ({1:.1f} kb)".format(file_count, size_kb))
+            except Exception as e:
+                sublime.error_message("Error processing path: {0}".format(str(e)))
+
+class OllamaRemoveContextCommand(sublime_plugin.WindowCommand):
+    def run(self):
+        settings = sublime.load_settings('Ollama.sublime-settings')
+        context_paths = settings.get('context_paths', [])
+        
+        if not context_paths:
+            sublime.error_message("No context paths defined")
+            return
+        
+        self.context_paths = context_paths
+        self.window.show_quick_panel(context_paths, self.on_done)
+    
+    def on_done(self, index):
+        if index >= 0:
+            settings = sublime.load_settings('Ollama.sublime-settings')
+            context_paths = settings.get('context_paths', [])
+            removed_path = context_paths.pop(index)
+            settings.set('context_paths', context_paths)
+            sublime.save_settings('Ollama.sublime-settings')
+            sublime.status_message("Removed context: {0}".format(removed_path))
+
+# Modify the RequestThread class to include context files
+def get_context_files(context_paths, supported_extensions):
+    files_content = []
+    for path in context_paths:
+        try:
+            if '**' in path:
+                base_path = path.split('**')[0]
+                pattern = path.split('**')[1]
+                for root, _, files in os.walk(base_path):
+                    for file in files:
+                        if any(file.endswith('.' + ext) for ext in supported_extensions):
+                            file_path = os.path.join(root, file)
+                            if fnmatch.fnmatch(file_path, path):
+                                with open(file_path, 'r', encoding='utf-8') as f:
+                                    content = f.read()
+                                    files_content.append("File: {0}\n\n{1}\n\n".format(file_path, content))
+            else:
+                if os.path.isfile(path):
+                    if any(path.endswith('.' + ext) for ext in supported_extensions):
+                        with open(path, 'r', encoding='utf-8') as f:
+                            content = f.read()
+                            files_content.append("File: {0}\n\n{1}\n\n".format(path, content))
+                elif os.path.isdir(path):
+                    for file in os.listdir(path):
+                        if any(file.endswith('.' + ext) for ext in supported_extensions):
+                            file_path = os.path.join(path, file)
+                            if os.path.isfile(file_path):
+                                with open(file_path, 'r', encoding='utf-8') as f:
+                                    content = f.read()
+                                    files_content.append("File: {0}\n\n{1}\n\n".format(file_path, content))
+        except Exception as e:
+            print("Error processing context path {0}: {1}".format(path, str(e)))
+    
+    return "\n".join(files_content)

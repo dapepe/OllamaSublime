@@ -14,5 +14,12 @@
         }
         // Add more templates as needed
     ],
-    "available_models": []
+    "supported_extensions": [
+        "txt", "md", "markdown", "py", "js", "jsx", "ts", "tsx", 
+        "html", "css", "scss", "json", "yaml", "yml", "xml", "csv",
+        "sh", "bash", "zsh", "rb", "php", "java", "c", "cpp", "h", 
+        "hpp", "cs", "go", "rs", "swift", "kt", "r", "sql", "conf",
+        "cfg", "ini", "env", "properties", "toml"
+    ],
+    "context_paths": []
 }

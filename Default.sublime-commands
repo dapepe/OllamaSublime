@@ -58,5 +58,15 @@
         "caption": "Ollama: Cancel Request",
         "command": "ollama_cancel_request",
         "args": {}
+    },
+    {
+        "caption": "Ollama: Add Context",
+        "command": "ollama_add_context",
+        "args": {}
+    },
+    {
+        "caption": "Ollama: Remove Context",
+        "command": "ollama_remove_context",
+        "args": {}
     }
 ]
