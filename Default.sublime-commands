@@ -1,57 +1,62 @@
 [
     {
-        "caption": "OllamaSublime: Settings",
+        "caption": "Ollama: Settings",
         "command": "edit_settings",
         "args": {
-            "base_file": "${packages}/OllamaSublime/OllamaSublime.sublime-settings",
-            "default": "// settings in here override those in \"OllamaSublime/OllamaSublime.sublime-settings\",\n\n{\n\t$0\n}\n"
+            "base_file": "${packages}/Ollama/Ollama.sublime-settings",
+            "default": "// settings in here override those in \"Ollama/Ollama.sublime-settings\",\n\n{\n\t$0\n}\n"
         }
     },
     {
-        "caption": "OllamaSublime: Select Model",
-        "command": "ollama_sublime_select_model",
+        "caption": "Ollama: Select Model",
+        "command": "ollama_select_model",
         "args": {}
     },
     {
-        "caption": "OllamaSublime: Ask Prompt",
-        "command": "ollama_sublime_ask_any",
+        "caption": "Ollama: Ask Prompt",
+        "command": "ollama_ask_any",
         "args": {
             "prompt": null
         }
     },
     {
-        "caption": "OllamaSublime: Use Template",
-        "command": "ollama_sublime_use_template",
+        "caption": "Ollama: Use Template",
+        "command": "ollama_use_template",
         "args": {}
     },
     {
-        "caption": "OllamaSublime: Add Template",
-        "command": "ollama_sublime_add_template",
+        "caption": "Ollama: Add Template",
+        "command": "ollama_add_template",
         "args": {}
     },
     {
-        "caption": "OllamaSublime: Edit Template",
-        "command": "ollama_sublime_edit_template",
+        "caption": "Ollama: Edit Template",
+        "command": "ollama_edit_template",
         "args": {}
     },
     {
-        "caption": "OllamaSublime: Remove Template",
-        "command": "ollama_sublime_remove_template",
+        "caption": "Ollama: Remove Template",
+        "command": "ollama_remove_template",
         "args": {}
     },
     {
-        "caption": "OllamaSublime: Show History",
-        "command": "ollama_sublime_show_history",
+        "caption": "Ollama: Show History",
+        "command": "ollama_show_history",
         "args": {}
     },
     {
-        "caption": "OllamaSublime: Clear History",
-        "command": "ollama_sublime_clear_history",
+        "caption": "Ollama: Clear History",
+        "command": "ollama_clear_history",
         "args": {}
     },
     {
-        "caption": "OllamaSublime: Toggle Output Panel",
-        "command": "ollama_sublime_toggle_output_panel",
+        "caption": "Ollama: Toggle Output Panel",
+        "command": "ollama_toggle_output_panel",
+        "args": {}
+    },
+    {
+        "caption": "Ollama: Cancel Request",
+        "command": "ollama_cancel_request",
         "args": {}
     }
 ]

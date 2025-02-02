@@ -1,6 +1,6 @@
-# OllamaSublime
+# Ollama for Sublime Text
 
-OllamaSublime is a Sublime Text plugin that provides seamless integration with Ollama, allowing you to interact with AI models directly from your editor.
+This plugin provides seamless integration between Sublime Text and Ollama, allowing you to interact with AI models directly from your editor.
 
 ## Features
 
@@ -22,31 +22,39 @@ OllamaSublime is a Sublime Text plugin that provides seamless integration with O
 
 1. Open Command Palette (Cmd/Ctrl + Shift + P)
 2. Select "Package Control: Install Package"
-3. Search for "OllamaSublime" and install
+3. Search for "Ollama" and install
 
 ## Usage
 
 ### Basic Commands
 
-- `Cmd/Ctrl + Shift + O`: Quick prompt input
-- `Cmd/Ctrl + Shift + K`: Toggle output panel
-- `Cmd/Ctrl + Shift + P` then type:
-  - `OllamaSublime: Select Model` to choose an Ollama model
-  - `OllamaSublime: Ask Prompt` to enter a prompt
-  - `OllamaSublime: Use Template` to use a saved template
-  - `OllamaSublime: Add Template` to save a new template
-  - `OllamaSublime: Remove Template` to delete a template
-  - `OllamaSublime: Settings` to configure the plugin
-  - `OllamaSublime: Cancel Request` to cancel the current request
-  - `OllamaSublime: Show History` to show the histor
-  - `OllamaSublime: Clear History` to clear the history
-  - `OllamaSublime: Toggle Output Panel` to show/hide the output panel
+Open the command window (`Cmd/Ctrl + Shift + P`) then type:
+  - `Ollama: Select Model` to choose an Ollama model
+  - `Ollama: Ask Prompt` to enter a prompt
+  - `Ollama: Use Template` to use a saved template
+  - `Ollama: Add Template` to save a new template
+  - `Ollama: Remove Template` to delete a template
+  - `Ollama: Settings` to configure the plugin
+  - `Ollama: Cancel Request` to cancel the current request
+  - `Ollama: Show History` to show the history
+  - `Ollama: Clear History` to clear the history
+  - `Ollama: Toggle Output Panel` to show/hide the output panel
+
+I recommend setting up keyboard shortcuts for these commands, e.g.
+
+```json
+{ "keys": ["shift+super+t"], "command": "ollama_use_template" },
+{ "keys": ["shift+super+h"], "command": "ollama_show_history" },
+{ "keys": ["super+shift+o"], "command": "ollama_ask_any", "args": { "prompt": null } },
+{ "keys": ["ctrk+shift+c"], "command": "ollama_cancel_request", "args": {} },
+{ "keys": ["super+shift+k"], "command": "ollama_toggle_output_panel", "args": {} }
+```
 
 ### Output Panel
 
 The output panel provides a dedicated space for viewing AI responses without modifying your current file. You can:
 - Toggle it with `Cmd/Ctrl + Shift + K`
-- Use it through Command Palette: `OllamaSublime: Toggle Output Panel`
+- Use it through Command Palette: `Ollama: Toggle Output Panel`
 - Keep it open while working with multiple prompts
 - Scroll through longer responses easily
 
@@ -63,20 +71,20 @@ Templates allow you to save frequently used prompts for quick access.
 
 To add a template:
 1. Open Command Palette
-2. Select "OllamaSublime: Add Template"
+2. Select "Ollama: Add Template"
 3. Enter template title
 4. Enter template prompt
 
 To use a template:
 1. Open Command Palette
-2. Select "OllamaSublime: Use Template"
+2. Select "Ollama: Use Template"
 3. Choose template from list
 4. Edit prompt if needed
 5. Press Enter to execute
 
 ## Configuration
 
-Default settings can be modified through: Preferences > Package Settings > OllamaSublime > Settings
+Default settings can be modified through: Preferences > Package Settings > Ollama > Settings
 
 ```json
 {

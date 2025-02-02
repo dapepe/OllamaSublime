@@ -8,14 +8,14 @@
         "id": "package-settings",
         "children": [
           {
-            "caption": "OllamaSublime",
+            "caption": "Ollama",
             "children": [
               {
                 "caption": "Settings",
                 "command": "edit_settings",
                 "args": {
-                  "base_file": "${packages}/OllamaSublime/OllamaSublime.sublime-settings",
-                  "default": "// settings in here override those in \"OllamaSublime/OllamaSublime.sublime-settings\",\n\n{\n\t$0\n}\n"
+                  "base_file": "${packages}/Ollama/Ollama.sublime-settings",
+                  "default": "// settings in here override those in \"Ollama/Ollama.sublime-settings\",\n\n{\n\t$0\n}\n"
                 }
               }
             ]

@@ -1,14 +1,1 @@
-[
-    {
-        "keys": ["ctrl+shift+o"],
-        "command": "ollama_sublime_ask_any",
-        "args": {
-            "prompt": null
-        }
-    },
-    {
-        "keys": ["ctrl+shift+c"],
-        "command": "ollama_sublime_cancel_request",
-        "args": {}
-    }
-] 
+[] 
