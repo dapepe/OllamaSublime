@@ -1,0 +1,13 @@
+{
+  "name": "ollama",
+  "version": "1.0.2",
+  "description": "Ollama integration for Sublime Text",
+  "author": "",
+  "license": "MIT",
+  "sublime_text": ">=4000",
+  "dependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/sublime-ollama"
+  }
+} 
