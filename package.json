@@ -1,6 +1,6 @@
 {
   "name": "ollama",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Ollama integration for Sublime Text",
   "author": "",
   "license": "MIT",
