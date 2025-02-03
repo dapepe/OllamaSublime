@@ -1,6 +1,6 @@
 {
     "ollamaUrl": "http://localhost:11434",
-    "systemPrompt": "You are a helpful assistant. Wirting style should be professional and concise. For analytical tasks, be brief and to the point. When I ask you to answer e-mails or generate messages, only generate the message without any additional intro or outro.",
+    "systemPrompt": "You are a helpful assistant. Writing style should be professional and concise. For analytical tasks, be brief and to the point. When I ask you to answer e-mails or generate messages, only generate the message without any additional intro or outro.",
     "selected_model": "",
     "templates": [
         {
